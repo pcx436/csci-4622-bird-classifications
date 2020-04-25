@@ -1,3 +1,6 @@
+from PIL import Image
+
+
 def main():
     # placeholder main function
     pass
