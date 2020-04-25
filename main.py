@@ -15,8 +15,11 @@ def build_id_list(filename):
 def main():
     images_directory = 'CUB_200_2011/images/'
 
+    # NOTE: All of the ids are 1 indexed in the 'images.txt' file, keep this in mind
+    id_list = build_id_list('CUB_200_2011/images.txt')
+
     # First image in the first category
-    test_image_path = images_directory + '001.Black_footed_Albatross/Black_Footed_Albatross_0001_796111.jpg'
+    test_image_path = images_directory + id_list[0]
 
     test_image = Image.open(test_image_path)
 
