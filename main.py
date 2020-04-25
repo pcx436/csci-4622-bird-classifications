@@ -1,4 +1,5 @@
-from PIL import Image
+from PIL import Image, ImageDraw
+
 
 # NOTE: All of the ids are 1 indexed in the 'images.txt' file, keep this in mind
 def build_id_list(filename):
@@ -26,6 +27,16 @@ def bounding_boxes(filename):
     return boxes
 
 
+def draw_bounding(image, box, new_name):
+    start_cord = tuple(box[0:2])
+    end_cord = (start_cord[0] + box[2], start_cord[1] + box[3])
+
+    draw = ImageDraw.Draw(image)
+    draw.rectangle([start_cord, end_cord], outline='white')
+
+    image.save(new_name)
+
+
 def main():
     images_directory = 'CUB_200_2011/images/'
 
@@ -39,6 +50,9 @@ def main():
 
     print('Test image dimensions:', test_image.size)
     print('Test image bounding box:', boxes[0])
+
+    # going to try drawing the bounding box
+    draw_bounding(test_image, boxes[0], 'newImage.jpg')
 
 
 if __name__ == '__main__':
