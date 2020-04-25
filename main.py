@@ -1,5 +1,16 @@
 from PIL import Image
 
+def build_id_list(filename):
+    id_list = list()
+
+    with open(filename, 'r') as library_file:
+        for line in library_file:
+            line_split = line.strip().split(' ')
+
+            id_list.append(line_split[1])  # add the name of the file to the list
+
+    return id_list
+
 
 def main():
     images_directory = 'CUB_200_2011/images/'
