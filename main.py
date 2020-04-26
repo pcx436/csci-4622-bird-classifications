@@ -89,7 +89,17 @@ def main():
             positive_growth = (cartesian_box[dimension + 2] + growth_needed) - image_dimensions[dimension]
             positive_growth_debt = abs(positive_growth) if positive_growth > 0 else 0
 
-            # TODO: figure out how to use growth debts to determine how much to grow in one direction
+            if negative_growth_debt == 0 and positive_growth_debt == 0:  # no debt, can grow freely
+                current_box[dimension] -= growth_needed
+                current_box[dimension + 2] += growth_needed
+
+            elif negative_growth_debt != 0:  # negative debt, grow positive as needed
+                current_box[dimension] = 0
+                current_box[dimension + 2] += growth_needed + negative_growth_debt
+
+            else:  # positive debt, grow negative as needed
+                current_box[dimension] += growth_needed + positive_growth_debt
+                current_box[dimension + 2] = image_dimensions[dimension]
 
         else:
             print('Bounding box for bird id {} can not be resized.'.format(0), file=stderr)
