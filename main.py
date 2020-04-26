@@ -55,7 +55,6 @@ def crop_by_box(image, current_box):
 
 def resize_bounding(image_dimensions, current_box):
     # resizing dimensions of bounding box as necessary
-    cartesian_box = convert_cartesian(current_box)
     (box_width, box_height) = current_box[2:]
 
     # box dimensions must change
