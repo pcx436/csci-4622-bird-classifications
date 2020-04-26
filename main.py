@@ -1,5 +1,6 @@
 from PIL import Image, ImageDraw
 from warnings import warn
+import argparse
 
 
 # NOTE: All of the ids are 1 indexed in the 'images.txt' file, keep this in mind
@@ -9,8 +10,8 @@ def build_id_list(filename):
     with open(filename, 'r') as library_file:
         for line in library_file:
             line_split = line.strip().split(' ')
-
-            id_list.append(line_split[1])  # add the name of the file to the list
+            # add the name of the file to the list
+            id_list.append(line_split[1])  
 
     return id_list
 
@@ -20,9 +21,10 @@ def read_bounding_boxes(filename):
     boxes = list()
     with open(filename, 'r') as boxes_file:
         for line in boxes_file:
-            line_split = line.strip().split(' ')[1:]  # remove the index at the beginning of the line
-
-            converted_tuple = [float(param) for param in line_split]  # convert coords to float, place in list
+            # remove the index at the beginning of the line
+            line_split = line.strip().split(' ')[1:]  
+            # convert coords to float, place in list
+            converted_tuple = [float(param) for param in line_split]  
             boxes.append(converted_tuple)
 
     return boxes
@@ -79,7 +81,8 @@ def resize_bounding(image_dimensions, current_box):
 
         elif negative_growth_debt != 0:  # negative debt, grow positive as needed
             current_box[dimension] = 0
-            current_box[dimension + 2] = current_box[3 - dimension]  # get the number for the opposite dimension
+            # get the number for the opposite dimension
+            current_box[dimension + 2] = current_box[3 - dimension]  
 
         else:  # positive debt, grow negative as needed
             current_box[dimension] -= growth_needed + positive_growth_debt
@@ -88,15 +91,30 @@ def resize_bounding(image_dimensions, current_box):
         return current_box
     else:
         ret_list = [-1, -1, -1, -1]
-        ret_list[dimension] = image_dimensions[dimension] - current_box[dimension]  # store amount more pixels required
+        # store amount more pixels required
+        ret_list[dimension] = image_dimensions[dimension] - current_box[dimension]  
         return ret_list
 
 
-def main():
-    images_directory = 'CUB_200_2011/images/'
+def parse_command_line_args():
+    parser = argparse.ArgumentParser(description='Preprocess bird images to '
+        'square uniform dimensions.')
+    parser.add_argument('-d', '--images_directory', required=True, 
+        help='Path to root images directory.')
+    parser.add_argument('-i', '--images_file', required=True, help='Path to ' 
+        'file with image id and name.')
+    parser.add_argument('-b', '--bounding_box_file', required=True, help='Path to' 
+        ' file with image id and bounding box info.')
+    parser.add_argument('-o', '--output_directory', required=True, help='Path '
+        'to directory where you want resulting image information stored.')
+    return parser.parse_args()
 
-    id_list = build_id_list('CUB_200_2011/images.txt')
-    boxes = read_bounding_boxes('CUB_200_2011/bounding_boxes.txt')
+def main():
+    args = parse_command_line_args()
+    images_directory = args.images_directory
+
+    id_list = build_id_list(args.images_file)
+    boxes = read_bounding_boxes(args.bounding_box_file)
 
     num_cant_resize = 0
     for i in range(len(id_list)):
@@ -112,7 +130,8 @@ def main():
                 num_cant_resize += 1
                 warn('Bounding box of bird {} could not be resized!'.format(i + 1))
 
-    print('Could not resize {} images ({:.2f}%).'.format(num_cant_resize, (num_cant_resize / len(id_list)) * 100))
+    print('Could not resize {} images ({:.2f}%).'.format(num_cant_resize, 
+        (num_cant_resize / len(id_list)) * 100))
 
 
 if __name__ == '__main__':
