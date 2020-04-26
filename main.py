@@ -62,8 +62,28 @@ def main():
 
     test_image = Image.open(test_image_path)
 
-    print('Test image dimensions:', test_image.size)
+    print('Test image dimensions: {}px width, {}px height'.format(test_image.width, test_image.height))
     print('Test image bounding box:', boxes[0])
+    print('Bounding box dimensions: {}px width, {}px height'.format(boxes[0][2], boxes[0][3]))
+
+    # resizing dimensions of bounding box as necessary
+    current_box = boxes[0]
+    cartesian_box = convert_cartesian(current_box)
+    image_dimensions = test_image.size
+    (box_width, box_height) = current_box[2:]
+
+    if box_width != box_height:
+        # box dimensions must change
+        growth = abs(box_width - box_height) / 2.0
+        dimension = 0 if box_width < box_height else 1
+
+        # calculate the amount of px needed to grow in either direction
+        negative_growth = cartesian_box[dimension] - growth
+        negative_growth_debt = abs(negative_growth) if negative_growth < 0 else 0
+
+        positive_growth = (cartesian_box[dimension + 2] + growth) - image_dimensions[dimension]
+        positive_growth_debt = abs(positive_growth) if positive_growth > 0 else 0
+
 
     # going to try drawing the bounding box
     # bounded_image = draw_bounding(test_image, boxes[0])
