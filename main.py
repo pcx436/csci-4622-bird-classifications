@@ -37,6 +37,16 @@ def draw_bounding(image, box):
     return image
 
 
+# convert bounding box system to cartesian coordinate system
+def convert_cartesian(current_box):
+    left = current_box[0]
+    upper = current_box[1]
+    right = current_box[0] + current_box[2]
+    lower = current_box[1] + current_box[3]
+
+    return left, upper, right, lower
+
+
 def main():
     images_directory = 'CUB_200_2011/images/'
 
