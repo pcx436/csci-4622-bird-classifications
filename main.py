@@ -1,5 +1,6 @@
 from PIL import Image, ImageDraw
 from sys import stderr
+from numpy.random import randint
 
 
 # NOTE: All of the ids are 1 indexed in the 'images.txt' file, keep this in mind
@@ -52,57 +53,86 @@ def crop_by_box(image, current_box):
     return cropped_image
 
 
+def resize_bounding(image_dimensions, current_box):
+    # resizing dimensions of bounding box as necessary
+    cartesian_box = convert_cartesian(current_box)
+    (box_width, box_height) = current_box[2:]
+
+    # box dimensions must change
+    dimension = 0 if box_width < box_height else 1
+    difference = abs(box_width - box_height)
+
+    if difference <= (image_dimensions[dimension] - current_box[dimension]):  # needed box growth can fit in image
+        growth_needed = difference / 2
+
+        # calculate the amount of px needed to grow in either direction
+        negative_growth = current_box[dimension] - growth_needed
+        negative_growth_debt = abs(negative_growth) if negative_growth < 0 else 0
+
+        current_positive = current_box[dimension] + current_box[dimension + 2]
+        positive_growth = (current_positive + growth_needed) - image_dimensions[dimension]
+        positive_growth_debt = abs(positive_growth) if positive_growth > 0 else 0
+
+        if negative_growth_debt == 0 and positive_growth_debt == 0:  # no debt, can grow freely
+            current_box[dimension] -= growth_needed
+            current_box[dimension + 2] += growth_needed
+
+        elif negative_growth_debt != 0:  # negative debt, grow positive as needed
+            current_box[dimension] = 0
+            current_box[dimension + 2] += growth_needed + negative_growth_debt
+
+        else:  # positive debt, grow negative as needed
+            current_box[dimension] += growth_needed + positive_growth_debt
+            current_box[dimension + 2] = image_dimensions[dimension]
+
+        return current_box
+    else:
+        ret_list = [-1, -1, -1, -1]
+        ret_list[dimension] = image_dimensions[dimension] - current_box[dimension]  # store amount more pixels required
+        return ret_list
+
+
 def main():
     images_directory = 'CUB_200_2011/images/'
 
     id_list = build_id_list('CUB_200_2011/images.txt')
     boxes = read_bounding_boxes('CUB_200_2011/bounding_boxes.txt')
 
+    test_image_name = '072.Pomarine_Jaeger/Pomarine_Jaeger_0029_61365.jpg'
+
+    i = id_list.index(test_image_name)
+
     # First image in the first category
-    test_image_path = images_directory + id_list[0]
+    test_image_path = images_directory + test_image_name
 
-    test_image = Image.open(test_image_path)
+    # try 5 random images to resize the box of
+    # for i in randint(0, high=len(id_list), size=5):
+    image_name = id_list[i]
+    current_box = boxes[i]
 
-    print('Test image dimensions: {}px width, {}px height'.format(test_image.width, test_image.height))
-    print('Test image bounding box:', boxes[0])
-    print('Bounding box dimensions: {}px width, {}px height'.format(boxes[0][2], boxes[0][3]))
+    with Image.open(images_directory + image_name) as current_image:
+        print('Current image:', image_name)
+        print('Current image dimensions:', current_image.size)
+        print('Current bounding box:', (current_box))
+        draw_bounding(current_image, current_box, 'red').show()
 
-    # resizing dimensions of bounding box as necessary
-    current_box = boxes[0]
-    cartesian_box = convert_cartesian(current_box)
-    image_dimensions = test_image.size
-    (box_width, box_height) = current_box[2:]
+        new_bounding_box = resize_bounding(current_image.size, current_box)
 
-    if box_width != box_height:
-        # box dimensions must change
-        dimension = 0 if box_width < box_height else 1
+        print('New bounding box:', new_bounding_box)
+        print('New bounding box (cart):', convert_cartesian(new_bounding_box))
 
-        difference = abs(box_width - box_height)
-
-        if difference <= (image_dimensions[dimension] - current_box[dimension]):  # needed box growth can fit in image
-            growth_needed = difference * 2
-
-            # calculate the amount of px needed to grow in either direction
-            negative_growth = cartesian_box[dimension] - growth_needed
-            negative_growth_debt = abs(negative_growth) if negative_growth < 0 else 0
-
-            positive_growth = (cartesian_box[dimension + 2] + growth_needed) - image_dimensions[dimension]
-            positive_growth_debt = abs(positive_growth) if positive_growth > 0 else 0
-
-            if negative_growth_debt == 0 and positive_growth_debt == 0:  # no debt, can grow freely
-                current_box[dimension] -= growth_needed
-                current_box[dimension + 2] += growth_needed
-
-            elif negative_growth_debt != 0:  # negative debt, grow positive as needed
-                current_box[dimension] = 0
-                current_box[dimension + 2] += growth_needed + negative_growth_debt
-
-            else:  # positive debt, grow negative as needed
-                current_box[dimension] += growth_needed + positive_growth_debt
-                current_box[dimension + 2] = image_dimensions[dimension]
-
+        if new_bounding_box[0] == -1:
+           print('Height of new bounding box for bird {} short by {}px.'.format(i, new_bounding_box[1]),
+                 file=stderr)
+        elif new_bounding_box[1] == -1:
+            print('Width of new bounding box for bird {} short by {}px.'.format(i, new_bounding_box[0]),
+                  file=stderr)
         else:
-            print('Bounding box for bird id {} can not be resized.'.format(0), file=stderr)
+            print('Bounding box for bird id {} successfully resized!'.format(i))
+            image_with_resized_box = draw_bounding(current_image, new_bounding_box)
+            image_with_resized_box.show()
+
+    # garbage = input()
 
     # going to try drawing the bounding box
     # bounded_image = draw_bounding(test_image, boxes[0])
