@@ -22,7 +22,7 @@ def read_bounding_boxes(filename):
         for line in boxes_file:
             line_split = line.strip().split(' ')[1:]  # remove the index at the beginning of the line
 
-            converted_tuple = tuple([float(param) for param in line_split])  # convert coords to float, place in tuple
+            converted_tuple = [float(param) for param in line_split]  # convert coords to float, place in list
             boxes.append(converted_tuple)
 
     return boxes
