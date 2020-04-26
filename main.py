@@ -47,6 +47,13 @@ def convert_cartesian(current_box):
     return left, upper, right, lower
 
 
+# crop an image to its bounding box
+def crop_by_box(image, current_box):
+    crop_box = convert_cartesian(current_box)
+    cropped_image = image.crop(crop_box)
+    return cropped_image
+
+
 def main():
     images_directory = 'CUB_200_2011/images/'
 
@@ -64,6 +71,9 @@ def main():
     # going to try drawing the bounding box
     # bounded_image = draw_bounding(test_image, boxes[0])
 
+    # attempt to crop image
+    cropped_image = crop_by_box(test_image, boxes[0])
+    cropped_image.show()
 
 
 if __name__ == '__main__':
