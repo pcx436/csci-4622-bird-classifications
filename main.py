@@ -80,13 +80,13 @@ def main():
         difference = abs(box_width - box_height)
 
         if difference <= (image_dimensions[dimension] - current_box[dimension]):  # needed box growth can fit in image
-            growth = difference * 2
+            growth_needed = difference * 2
 
             # calculate the amount of px needed to grow in either direction
-            negative_growth = cartesian_box[dimension] - growth
+            negative_growth = cartesian_box[dimension] - growth_needed
             negative_growth_debt = abs(negative_growth) if negative_growth < 0 else 0
 
-            positive_growth = (cartesian_box[dimension + 2] + growth) - image_dimensions[dimension]
+            positive_growth = (cartesian_box[dimension + 2] + growth_needed) - image_dimensions[dimension]
             positive_growth_debt = abs(positive_growth) if positive_growth > 0 else 0
 
             # TODO: figure out how to use growth debts to determine how much to grow in one direction
