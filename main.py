@@ -1,4 +1,5 @@
 from PIL import Image, ImageDraw
+from sys import stderr
 
 
 # NOTE: All of the ids are 1 indexed in the 'images.txt' file, keep this in mind
@@ -74,16 +75,21 @@ def main():
 
     if box_width != box_height:
         # box dimensions must change
-        growth = abs(box_width - box_height) / 2.0
         dimension = 0 if box_width < box_height else 1
 
-        # calculate the amount of px needed to grow in either direction
-        negative_growth = cartesian_box[dimension] - growth
-        negative_growth_debt = abs(negative_growth) if negative_growth < 0 else 0
+        difference = abs(box_width - box_height)
+        if difference <= image_dimensions[dimension]:
+            growth = difference * 2
 
-        positive_growth = (cartesian_box[dimension + 2] + growth) - image_dimensions[dimension]
-        positive_growth_debt = abs(positive_growth) if positive_growth > 0 else 0
+            # calculate the amount of px needed to grow in either direction
+            negative_growth = cartesian_box[dimension] - growth
+            negative_growth_debt = abs(negative_growth) if negative_growth < 0 else 0
 
+            positive_growth = (cartesian_box[dimension + 2] + growth) - image_dimensions[dimension]
+            positive_growth_debt = abs(positive_growth) if positive_growth > 0 else 0
+
+        else:
+            print('Bounding box for bird id {} can not be resized.'.format(0), file=stderr)
 
     # going to try drawing the bounding box
     # bounded_image = draw_bounding(test_image, boxes[0])
