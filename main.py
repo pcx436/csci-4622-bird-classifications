@@ -27,14 +27,14 @@ def bounding_boxes(filename):
     return boxes
 
 
-def draw_bounding(image, box, new_name):
+def draw_bounding(image, box):
     start_cord = tuple(box[0:2])
     end_cord = (start_cord[0] + box[2], start_cord[1] + box[3])
 
     draw = ImageDraw.Draw(image)
     draw.rectangle([start_cord, end_cord], outline='white')
 
-    image.save(new_name)
+    return image
 
 
 def main():
@@ -52,7 +52,8 @@ def main():
     print('Test image bounding box:', boxes[0])
 
     # going to try drawing the bounding box
-    draw_bounding(test_image, boxes[0], 'newImage.jpg')
+    # bounded_image = draw_bounding(test_image, boxes[0])
+
 
 
 if __name__ == '__main__':
