@@ -28,11 +28,8 @@ def read_bounding_boxes(filename):
 
 
 def draw_bounding(image, box):
-    start_cord = tuple(box[0:2])
-    end_cord = (start_cord[0] + box[2], start_cord[1] + box[3])
-
     draw = ImageDraw.Draw(image)
-    draw.rectangle([start_cord, end_cord], outline='white')
+    draw.rectangle(convert_cartesian(box), outline='white')
 
     return image
 
