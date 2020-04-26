@@ -1,6 +1,7 @@
 from PIL import Image, ImageDraw
 from warnings import warn
 import argparse
+import numpy as np
 
 
 # NOTE: All of the ids are 1 indexed in the 'images.txt' file, keep this in mind
@@ -103,10 +104,10 @@ def parse_command_line_args():
         help='Path to root images directory.')
     parser.add_argument('-i', '--images_file', required=True, help='Path to ' 
         'file with image id and name.')
-    parser.add_argument('-b', '--bounding_box_file', required=True, help='Path to' 
-        ' file with image id and bounding box info.')
-    parser.add_argument('-o', '--output_directory', required=True, help='Path '
-        'to directory where you want resulting image information stored.')
+    parser.add_argument('-b', '--bounding_box_file', required=True, help='Path ' 
+        ' to file with image id and bounding box info.')
+    parser.add_argument('-o', '--output_file', required=True, help='Path to '
+        'file where you want resulting image information stored (npz format).')
     return parser.parse_args()
 
 def main():
@@ -115,6 +116,7 @@ def main():
 
     id_list = build_id_list(args.images_file)
     boxes = read_bounding_boxes(args.bounding_box_file)
+    output_arrays = list()
 
     num_cant_resize = 0
     for i in range(len(id_list)):
@@ -126,12 +128,17 @@ def main():
 
             if -1 not in resized_box:
                 boxes[i] = resized_box
+                cropped_image = crop_by_box(current_image, resized_box)
+                output_arrays.append(np.asarray(cropped_image))
             else:
                 num_cant_resize += 1
                 warn('Bounding box of bird {} could not be resized!'.format(i + 1))
 
+    print('Number of valid images: {}'.format(len(output_arrays)))
     print('Could not resize {} images ({:.2f}%).'.format(num_cant_resize, 
         (num_cant_resize / len(id_list)) * 100))
+    print('Saving image data to {}...'.format(args.output_file))
+    np.savez_compressed(args.output_file, *output_arrays)
 
 
 if __name__ == '__main__':
