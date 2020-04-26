@@ -79,7 +79,7 @@ def main():
 
         difference = abs(box_width - box_height)
 
-        if difference <= image_dimensions[dimension]:  # needed box growth can fit in image
+        if difference <= (image_dimensions[dimension] - current_box[dimension]):  # needed box growth can fit in image
             growth = difference * 2
 
             # calculate the amount of px needed to grow in either direction
