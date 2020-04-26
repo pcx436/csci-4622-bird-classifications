@@ -38,9 +38,9 @@ def convert_cartesian(current_box):
     return left, upper, right, lower
 
 
-def draw_bounding(image, box):
+def draw_bounding(image, box, color='white'):
     draw = ImageDraw.Draw(image)
-    draw.rectangle(convert_cartesian(box), outline='white')
+    draw.rectangle(convert_cartesian(box), outline=color)
 
     return image
 
