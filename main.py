@@ -81,11 +81,11 @@ def resize_bounding(image_dimensions, current_box):
 
         elif negative_growth_debt != 0:  # negative debt, grow positive as needed
             current_box[dimension] = 0
-            current_box[dimension + 2] += difference + negative_growth_debt
+            current_box[dimension + 2] = current_box[3 - dimension]  # get the number for the opposite dimension
 
         else:  # positive debt, grow negative as needed
-            current_box[dimension] += difference + positive_growth_debt
-            current_box[dimension + 2] = image_dimensions[dimension]
+            current_box[dimension] -= growth_needed + positive_growth_debt
+            current_box[dimension + 2] = current_box[3 - dimension]
 
         return current_box
     else:
