@@ -15,7 +15,7 @@ def build_id_list(filename):
 
 
 # reads in the bounding boxes
-def bounding_boxes(filename):
+def read_bounding_boxes(filename):
     boxes = list()
     with open(filename, 'r') as boxes_file:
         for line in boxes_file:
@@ -58,7 +58,7 @@ def main():
     images_directory = 'CUB_200_2011/images/'
 
     id_list = build_id_list('CUB_200_2011/images.txt')
-    boxes = bounding_boxes('CUB_200_2011/bounding_boxes.txt')
+    boxes = read_bounding_boxes('CUB_200_2011/bounding_boxes.txt')
 
     # First image in the first category
     test_image_path = images_directory + id_list[0]
