@@ -27,13 +27,6 @@ def read_bounding_boxes(filename):
     return boxes
 
 
-def draw_bounding(image, box):
-    draw = ImageDraw.Draw(image)
-    draw.rectangle(convert_cartesian(box), outline='white')
-
-    return image
-
-
 # convert bounding box system to cartesian coordinate system
 def convert_cartesian(current_box):
     left = current_box[0]
@@ -42,6 +35,13 @@ def convert_cartesian(current_box):
     lower = current_box[1] + current_box[3]
 
     return left, upper, right, lower
+
+
+def draw_bounding(image, box):
+    draw = ImageDraw.Draw(image)
+    draw.rectangle(convert_cartesian(box), outline='white')
+
+    return image
 
 
 # crop an image to its bounding box
@@ -69,8 +69,8 @@ def main():
     # bounded_image = draw_bounding(test_image, boxes[0])
 
     # attempt to crop image
-    cropped_image = crop_by_box(test_image, boxes[0])
-    cropped_image.show()
+    # cropped_image = crop_by_box(test_image, boxes[0])
+    # cropped_image.show()
 
 
 if __name__ == '__main__':
