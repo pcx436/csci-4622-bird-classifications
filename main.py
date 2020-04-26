@@ -62,7 +62,9 @@ def resize_bounding(image_dimensions, current_box):
     dimension = 0 if box_width < box_height else 1
     difference = abs(box_width - box_height)
 
-    if difference <= (image_dimensions[dimension] - current_box[dimension]):  # needed box growth can fit in image
+    free_space = image_dimensions[dimension] - current_box[dimension + 2]
+
+    if difference <= free_space:  # needed box growth can fit in image
         growth_needed = difference / 2
 
         # calculate the amount of px needed to grow in either direction
