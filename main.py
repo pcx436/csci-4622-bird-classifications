@@ -1,6 +1,5 @@
 from PIL import Image, ImageDraw
-from sys import stderr
-from numpy.random import randint
+from warnings import warn
 
 
 # NOTE: All of the ids are 1 indexed in the 'images.txt' file, keep this in mind
@@ -99,56 +98,21 @@ def main():
     id_list = build_id_list('CUB_200_2011/images.txt')
     boxes = read_bounding_boxes('CUB_200_2011/bounding_boxes.txt')
 
-    # test_image_name = '072.Pomarine_Jaeger/Pomarine_Jaeger_0029_61365.jpg'
-    # test_image_name = '110.Geococcyx/Geococcyx_0099_104134.jpg'
-    # test_image_name = '156.White_eyed_Vireo/White_Eyed_Vireo_0018_159450.jpg'
-    # test_image_name = '190.Red_cockaded_Woodpecker/Red_Cockaded_Woodpecker_0025_794710.jpg'
-    test_image_name = '157.Yellow_throated_Vireo/Yellow_Throated_Vireo_0025_795009.jpg'
-
-    i = id_list.index(test_image_name)
-
-    # First image in the first category
-    test_image_path = images_directory + test_image_name
-
-    num_birds = int(input('Please enter the number of birds you would like to see: '))
-    # try 5 random images to resize the box of
-    for i in randint(0, high=len(id_list), size=num_birds):
-        image_name = id_list[i]
+    num_cant_resize = 0
+    for i in range(len(id_list)):
+        bird_id = id_list[i]
         current_box = boxes[i]
 
-        with Image.open(images_directory + image_name) as current_image:
-            print('Current image:', image_name)
-            print('Current image dimensions:', current_image.size)
-            print('Current bounding box:', current_box)
-            # current_image = draw_bounding(current_image, current_box, 'red')
-            # current_image.show()
+        with Image.open(images_directory + bird_id) as current_image:
+            resized_box = resize_bounding(current_image.size, current_box)
 
-            new_bounding_box = resize_bounding(current_image.size, current_box)
-
-            # error checking:
-            (new_width, new_height) = new_bounding_box[2:]
-
-
-            print('New bounding box:', new_bounding_box)
-            print('New bounding box (cart):', convert_cartesian(new_bounding_box))
-
-            if new_bounding_box[0] == -1:
-               print('Height of new bounding box for bird {} short by {}px.'.format(i, new_bounding_box[1]),
-                     file=stderr)
-            elif new_bounding_box[1] == -1:
-                print('Width of new bounding box for bird {} short by {}px.'.format(i, new_bounding_box[0]),
-                      file=stderr)
+            if -1 not in resized_box:
+                boxes[i] = resized_box
             else:
-                print('Bounding box for bird id {} successfully resized!'.format(i))
-                image_with_resized_box = crop_by_box(current_image, new_bounding_box)
-                image_with_resized_box.show()
+                num_cant_resize += 1
+                warn('Bounding box of bird {} could not be resized!'.format(i + 1))
 
-    # going to try drawing the bounding box
-    # bounded_image = draw_bounding(test_image, boxes[0])
-
-    # attempt to crop image
-    # cropped_image = crop_by_box(test_image, boxes[0])
-    # cropped_image.show()
+    print('Could not resize {} images ({:.2f}%).'.format(num_cant_resize, (num_cant_resize / len(id_list)) * 100))
 
 
 if __name__ == '__main__':
