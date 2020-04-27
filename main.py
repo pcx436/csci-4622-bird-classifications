@@ -159,6 +159,10 @@ def main():
         np.savez_compressed(args.output_file, *image_array_output, image_name_output)
     else:  # images have been processed already
         loaded_arrays = np.load(args.npz_file)
+        names_array = loaded_arrays['files'][-1]  # names will always be last array, currently only array name
+        names_array = loaded_arrays[names_array]  # grab the actual names of the files
+
+        image_data = np.array([loaded_arrays[array_name] for array_name in loaded_arrays['files'][-1]])
 
 
 if __name__ == '__main__':
