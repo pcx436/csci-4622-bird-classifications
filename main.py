@@ -99,10 +99,11 @@ def resize_bounding(image_dimensions, current_box):
 
 def parse_command_line_args():
     parser = argparse.ArgumentParser(description='Preprocess bird images to square uniform dimensions.')
-    parser.add_argument('-d', '--images-directory', required=True, help='Path to root images directory.')
+    parser.add_argument('-d', '--images-directory', required=True,
+                        help='Path to root images directory. Not used when -o is provided.')
     parser.add_argument('-l', '--image-list', required=True, help='Path to file with image id and name.')
     parser.add_argument('-b', '--bounding-box-file', required=True,
-                        help='Path to file with image id and bounding box info.')
+                        help='Path to file with image id and bounding box info. Not used when -o is provided.')
 
     in_or_out = parser.add_mutually_exclusive_group(required=True)
     in_or_out.add_argument('-o', '--output-file',
