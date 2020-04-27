@@ -103,8 +103,11 @@ def parse_command_line_args():
     parser.add_argument('-l', '--image-list', required=True, help='Path to file with image id and name.')
     parser.add_argument('-b', '--bounding-box-file', required=True,
                         help='Path to file with image id and bounding box info.')
-    parser.add_argument('-o', '--output-file', required=True, help='Path to file where you want resulting\
-        image information stored (npz format).')
+
+    in_or_out = parser.add_mutually_exclusive_group(required=True)
+    in_or_out.add_argument('-o', '--output-file',
+                           help='Path to file where you want resulting image information stored (npz format).')
+    in_or_out.add_argument('-i', '--input-file', help='Path to .npz file containing image data.')
     return parser.parse_args()
 
 
