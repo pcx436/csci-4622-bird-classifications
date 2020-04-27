@@ -98,17 +98,15 @@ def resize_bounding(image_dimensions, current_box):
 
 
 def parse_command_line_args():
-    parser = argparse.ArgumentParser(description='Preprocess bird images to '
-        'square uniform dimensions.')
-    parser.add_argument('-d', '--images_directory', required=True, 
-        help='Path to root images directory.')
-    parser.add_argument('-i', '--images_file', required=True, help='Path to ' 
-        'file with image id and name.')
-    parser.add_argument('-b', '--bounding_box_file', required=True, help='Path ' 
-        ' to file with image id and bounding box info.')
-    parser.add_argument('-o', '--output_file', required=True, help='Path to '
-        'file where you want resulting image information stored (npz format).')
+    parser = argparse.ArgumentParser(description='Preprocess bird images to square uniform dimensions.')
+    parser.add_argument('-d', '--images_directory', required=True, help='Path to root images directory.')
+    parser.add_argument('-i', '--images_file', required=True, help='Path to file with image id and name.')
+    parser.add_argument('-b', '--bounding_box_file', required=True, help='Path  to file with image id and \
+        bounding box info.')
+    parser.add_argument('-o', '--output_file', required=True, help='Path to file where you want resulting\
+        image information stored (npz format).')
     return parser.parse_args()
+
 
 def main():
     args = parse_command_line_args()
@@ -135,8 +133,8 @@ def main():
                 warn('Bounding box of bird {} could not be resized!'.format(i + 1))
 
     print('Number of valid images: {}'.format(len(output_arrays)))
-    print('Could not resize {} images ({:.2f}%).'.format(num_cant_resize, 
-        (num_cant_resize / len(id_list)) * 100))
+    print('Could not resize {} images ({:.2f}%).'.format(num_cant_resize,
+                                                         (num_cant_resize / len(id_list)) * 100))
     print('Saving image data to {}...'.format(args.output_file))
     np.savez_compressed(args.output_file, *output_arrays)
 
