@@ -116,7 +116,7 @@ def main():
     args = parse_command_line_args()
     id_list = build_id_list(args.image_list)
 
-    if not args.npz_file:  # haven't processed images once
+    if args.output_file:  # haven't processed images once
         images_directory = args.images_directory
         boxes = read_bounding_boxes(args.bounding_box_file)
 
@@ -150,7 +150,7 @@ def main():
         print('Saving image data to {}...'.format(args.output_file))
         np.savez_compressed(args.output_file, *image_array_output, image_name_output)
     else:  # images have been processed already
-        loaded_arrays = np.load(args.npz_file)
+        loaded_arrays = np.load(args.input_file)
         names_array = loaded_arrays['files'][-1]  # names will always be last array, currently only array name
         names_array = loaded_arrays[names_array]  # grab the actual names of the files
 
