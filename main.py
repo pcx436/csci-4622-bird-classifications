@@ -99,44 +99,63 @@ def resize_bounding(image_dimensions, current_box):
 
 def parse_command_line_args():
     parser = argparse.ArgumentParser(description='Preprocess bird images to square uniform dimensions.')
-    parser.add_argument('-d', '--images_directory', required=True, help='Path to root images directory.')
-    parser.add_argument('-i', '--images_file', required=True, help='Path to file with image id and name.')
-    parser.add_argument('-b', '--bounding_box_file', required=True, help='Path  to file with image id and \
-        bounding box info.')
-    parser.add_argument('-o', '--output_file', required=True, help='Path to file where you want resulting\
-        image information stored (npz format).')
+    parser.add_argument('-d', '--images-directory',
+                        help='Path to root images directory. Not used when -o is provided.')
+    parser.add_argument('-l', '--image-list', required=True, help='Path to file with image id and name.')
+    parser.add_argument('-b', '--bounding-box-file',
+                        help='Path to file with image id and bounding box info. Not used when -o is provided.')
+
+    in_or_out = parser.add_mutually_exclusive_group(required=True)
+    in_or_out.add_argument('-o', '--output-file',
+                           help='Path to file where you want resulting image information stored (npz format).')
+    in_or_out.add_argument('-i', '--input-file', help='Path to .npz file containing image data.')
     return parser.parse_args()
 
 
 def main():
     args = parse_command_line_args()
-    images_directory = args.images_directory
+    id_list = build_id_list(args.image_list)
 
-    id_list = build_id_list(args.images_file)
-    boxes = read_bounding_boxes(args.bounding_box_file)
-    output_arrays = list()
+    if args.output_file:  # haven't processed images once
+        images_directory = args.images_directory
+        boxes = read_bounding_boxes(args.bounding_box_file)
 
-    num_cant_resize = 0
-    for i in range(len(id_list)):
-        bird_id = id_list[i]
-        current_box = boxes[i]
+        image_array_output = list()
+        image_name_output = list()
 
-        with Image.open(images_directory + bird_id) as current_image:
-            resized_box = resize_bounding(current_image.size, current_box)
+        num_cant_resize = 0
+        for i in range(len(id_list)):
+            bird_id = id_list[i]
+            current_box = boxes[i]
 
-            if -1 not in resized_box:
-                boxes[i] = resized_box
-                cropped_image = crop_by_box(current_image, resized_box)
-                output_arrays.append(np.asarray(cropped_image))
-            else:
-                num_cant_resize += 1
-                warn('Bounding box of bird {} could not be resized!'.format(i + 1))
+            with Image.open(images_directory + bird_id) as current_image:
+                resized_box = resize_bounding(current_image.size, current_box)
 
-    print('Number of valid images: {}'.format(len(output_arrays)))
-    print('Could not resize {} images ({:.2f}%).'.format(num_cant_resize,
-                                                         (num_cant_resize / len(id_list)) * 100))
-    print('Saving image data to {}...'.format(args.output_file))
-    np.savez_compressed(args.output_file, *output_arrays)
+                if -1 not in resized_box:
+                    boxes[i] = resized_box
+                    cropped_image = crop_by_box(current_image, resized_box)
+
+                    # save array data for each image
+                    image_array_output.append(np.asarray(cropped_image))
+
+                    # save the name of each bird
+                    image_name_output.append(bird_id)
+                else:
+                    num_cant_resize += 1
+                    warn('Bounding box of bird {} could not be resized!'.format(i + 1))
+
+        print('Number of valid images: {}'.format(len(image_array_output)))
+        print('Could not resize {} images ({:.2f}%).'.format(num_cant_resize,
+                                                             (num_cant_resize / len(id_list)) * 100))
+        print('Saving image data to {}...'.format(args.output_file))
+        np.savez_compressed(args.output_file, image_data=image_array_output, image_names=image_name_output)
+    else:  # images have been processed already
+        loaded_arrays = np.load(args.input_file, allow_pickle=True)
+        names_array = loaded_arrays['image_names']  # names will always be last array
+
+        image_data = loaded_arrays['image_data']
+
+        Image.fromarray(image_data[0]).show()
 
 
 if __name__ == '__main__':
