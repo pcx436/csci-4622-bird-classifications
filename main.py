@@ -148,13 +148,14 @@ def main():
         print('Could not resize {} images ({:.2f}%).'.format(num_cant_resize,
                                                              (num_cant_resize / len(id_list)) * 100))
         print('Saving image data to {}...'.format(args.output_file))
-        np.savez_compressed(args.output_file, *image_array_output, image_name_output)
+        np.savez_compressed(args.output_file, image_data=image_array_output, image_names=image_name_output)
     else:  # images have been processed already
-        loaded_arrays = np.load(args.input_file)
-        names_array = loaded_arrays['files'][-1]  # names will always be last array, currently only array name
-        names_array = loaded_arrays[names_array]  # grab the actual names of the files
+        loaded_arrays = np.load(args.input_file, allow_pickle=True)
+        names_array = loaded_arrays['image_names']  # names will always be last array
 
-        image_data = np.array([loaded_arrays[array_name] for array_name in loaded_arrays['files'][-1]])
+        image_data = loaded_arrays['image_data']
+
+        Image.fromarray(image_data[0]).show()
 
 
 if __name__ == '__main__':
