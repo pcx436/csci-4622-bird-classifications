@@ -99,24 +99,12 @@ def resize_bounding(image_dimensions, current_box):
 
 def parse_command_line_args():
     parser = argparse.ArgumentParser(description='Preprocess bird images to square uniform dimensions.')
-    parser.add_argument('-l', '--image-list', required=True, help='Path to file with image id and name.')
-
-    exclusion_group = parser.add_mutually_exclusive_group(required=True)
-
-    no_input_group = exclusion_group.add_argument_group(title='No Compressed Images Group',
-                                                        description='Parameters used when no .npz file exists.')
-
-    with_input_group = exclusion_group.add_argument_group(title='With Compressed Images Group',
-                                                          description='Parameters used when a .npz file is provided.')
-
-    no_input_group.add_argument('-d', '--images-directory', required=True, help='Path to root images directory.')
-    no_input_group.add_argument('-b', '--bounding-box-file', required=True, help='Path  to file with image id and \
+    parser.add_argument('-d', '--images_directory', required=True, help='Path to root images directory.')
+    parser.add_argument('-i', '--images_file', required=True, help='Path to file with image id and name.')
+    parser.add_argument('-b', '--bounding_box_file', required=True, help='Path  to file with image id and \
         bounding box info.')
-    no_input_group.add_argument('-o', '--output-file', required=True, help='Path to file where you want resulting\
+    parser.add_argument('-o', '--output_file', required=True, help='Path to file where you want resulting\
         image information stored (npz format).')
-
-    with_input_group.add_argument('-i', '--npz-file', required=True, help='Path to .npz file which contains image data')
-
     return parser.parse_args()
 
 
