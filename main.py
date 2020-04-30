@@ -113,7 +113,7 @@ def parse_command_line_args():
     return parser.parse_args()
 
 
-def train_test_split(args):
+def load_images(args):
     id_list = build_id_list(args.image_list)
 
     if args.output_file:  # haven't processed images once
@@ -155,13 +155,16 @@ def train_test_split(args):
 
         image_data = loaded_arrays['image_data']
 
-        Image.fromarray(image_data[0]).show()
+
+def train_test_split(image_array, name_array):
+    # TODO: implement functionality
+    pass
 
 
 def main():
     args = parse_command_line_args()
 
-    train_test_split(args)
+    load_images(args)
 
 
 if __name__ == '__main__':
