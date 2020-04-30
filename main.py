@@ -98,6 +98,7 @@ def resize_bounding(image_dimensions, current_box):
 
 
 def parse_command_line_args():
+    # TODO: update help parameters to do
     parser = argparse.ArgumentParser(description='Preprocess bird images to square uniform dimensions.')
     parser.add_argument('-d', '--images-directory',
                         help='Path to root images directory. Not used when -o is provided.')
