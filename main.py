@@ -158,15 +158,20 @@ def load_images(args):
     return image_data, names_array
 
 
-def train_test_split(image_array, name_array):
-    # TODO: implement functionality
-    pass
+def train_test_split(image_array, name_array, percent_train=0.8, percent_test=0.1, percent_valid=0.1):
+    # check desired percentages add to 1.0
+    if percent_test + percent_train + percent_valid != 1.0:
+        raise RuntimeError('Percentages passed to train_test_split must add to 1.0!')
+
+    # TODO: get data statistics
 
 
 def main():
     args = parse_command_line_args()
 
-    load_images(args)
+    (image_data, names_array) = load_images(args)
+
+    train_test_split(image_data, names_array)
 
 
 if __name__ == '__main__':
