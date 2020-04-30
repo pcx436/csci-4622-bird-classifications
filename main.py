@@ -164,14 +164,15 @@ def train_test_split(image_array, name_array, percent_train=0.8, percent_test=0.
         raise RuntimeError('Percentages passed to train_test_split must add to 1.0!')
 
     # TODO: get data statistics
+    print(names)
 
 
 def main():
     args = parse_command_line_args()
 
-    (image_data, names_array) = load_images(args)
+    (image_array, name_array) = load_images(args)
 
-    train_test_split(image_data, names_array)
+    train_test_split(image_array, name_array)
 
 
 if __name__ == '__main__':
