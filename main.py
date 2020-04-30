@@ -116,12 +116,12 @@ def parse_command_line_args():
 def load_images(args):
     id_list = build_id_list(args.image_list)
 
+    image_data = list()
+    names_array = list()
+
     if args.output_file:  # haven't processed images once
         images_directory = args.images_directory
         boxes = read_bounding_boxes(args.bounding_box_file)
-
-        image_array_output = list()
-        image_name_output = list()
 
         num_cant_resize = 0
         for i in range(len(id_list)):
@@ -136,24 +136,26 @@ def load_images(args):
                     cropped_image = crop_by_box(current_image, resized_box)
 
                     # save array data for each image
-                    image_array_output.append(np.asarray(cropped_image))
+                    image_data.append(np.asarray(cropped_image))
 
                     # save the name of each bird
-                    image_name_output.append(bird_id)
+                    names_array.append(bird_id)
                 else:
                     num_cant_resize += 1
                     warn('Bounding box of bird {} could not be resized!'.format(i + 1))
 
-        print('Number of valid images: {}'.format(len(image_array_output)))
+        print('Number of valid images: {}'.format(len(image_data)))
         print('Could not resize {} images ({:.2f}%).'.format(num_cant_resize,
                                                              (num_cant_resize / len(id_list)) * 100))
         print('Saving image data to {}...'.format(args.output_file))
-        np.savez_compressed(args.output_file, image_data=image_array_output, image_names=image_name_output)
+        np.savez_compressed(args.output_file, image_data=image_data, image_names=names_array)
     else:  # images have been processed already
         loaded_arrays = np.load(args.input_file, allow_pickle=True)
         names_array = loaded_arrays['image_names']  # names will always be last array
 
         image_data = loaded_arrays['image_data']
+
+    return image_data, names_array
 
 
 def train_test_split(image_array, name_array):
