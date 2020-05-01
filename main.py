@@ -166,24 +166,18 @@ def train_test_split(image_array, name_array, percent_train=0.8, percent_test=0.
     if percent_test + percent_train + percent_valid != 1.0:
         raise RuntimeError('Percentages passed to train_test_split must add to 1.0!')
 
-    categories = dict()
-    cat_counts = list()
+    categories = list()
 
     for image_data, name in zip(image_array, name_array):
-        category = name.split('/')[0]
+        cat_number = name.split('/')[0]
+        cat_number = int(cat_number[:3])  # first three characters are the category number
 
-        if category in categories:
-            categories[category].append(image_data)
-
-            for i, cat in enumerate(cat_counts):
-                if cat[0] == category:
-                    cat_counts[i][1] += 1
-                    break
+        if cat_number <= len(categories):  # have we seen this category before
+            categories[cat_number - 1].append(image_data)
         else:
-            categories[category] = [name]
-            cat_counts.append([category, 1])
+            categories.append([image_data])
 
-    cat_counts.sort(key=lambda x: x[1], reverse=True)
+    x_train = list()
 
     train = list()
     test = list()
