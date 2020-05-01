@@ -171,30 +171,36 @@ def train_test_split(image_array, name_array, percent_train=0.8, percent_test=0.
 
     x_train = list()
     y_train = list()
-    num_train = int(percent_train * len(name_array))
 
     x_test = list()
     y_test = list()
-    num_test = int(percent_test * len(name_array))
 
     x_valid = list()
     y_valid = list()
-    num_valid = int(percent_valid * len(name_array))
 
     # grab actual data
     if random is True:
         # TODO: implement random sampling
         raise NotImplementedError('Have not implemented random sampling yet')
     else:
-        for cat_number, data_array in categories:
-            x_train.extend(data_array[:num_train])
-            y_train.extend([cat_number + 1] * num_train)
+        for i, data_array in enumerate(categories):
+            num_train = int(percent_train * len(data_array))
+            num_test = int(percent_test * len(data_array))
+            num_valid = int(percent_valid * len(data_array))
 
-            x_test.extend(data_array[num_train:num_train + num_test])
-            y_test.extend([cat_number + 1] * num_test)
+            cat_number = i + 1
 
-            x_valid.extend(data_array[num_train + num_test:])
-            y_valid.extend([cat_number + 1] * num_valid)
+            train_add = data_array[:num_train]
+            x_train.extend(train_add)
+            y_train.extend([cat_number] * len(train_add))
+
+            test_add = data_array[num_train:num_train + num_test]
+            x_test.extend(test_add)
+            y_test.extend([cat_number] * len(test_add))
+
+            valid_add = data_array[num_train + num_test:]
+            x_valid.extend(valid_add)
+            y_valid.extend([cat_number] * len(valid_add))
 
     return x_train, y_train, x_test, y_test, x_valid, y_valid
 
