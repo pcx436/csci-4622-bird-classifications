@@ -1,4 +1,4 @@
-from PIL import Image, ImageDraw
+from PIL import Image
 from warnings import warn
 import argparse
 import numpy as np
