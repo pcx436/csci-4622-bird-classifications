@@ -41,13 +41,6 @@ def convert_cartesian(current_box):
     return left, upper, right, lower
 
 
-def draw_bounding(image, box, color='white'):
-    draw = ImageDraw.Draw(image)
-    draw.rectangle(convert_cartesian(box), outline=color)
-
-    return image
-
-
 # crop an image to its bounding box
 def crop_by_box(image, current_box):
     crop_box = convert_cartesian(current_box)
