@@ -161,13 +161,36 @@ def load_images(args):
     return image_data, names_array
 
 
-def train_test_split(image_array, name_array, percent_train=0.8, percent_test=0.1, percent_valid=0.1):
+def train_test_split(image_array, name_array, percent_train=0.8, percent_test=0.1, percent_valid=0.1, random=True):
     # check desired percentages add to 1.0
     if percent_test + percent_train + percent_valid != 1.0:
         raise RuntimeError('Percentages passed to train_test_split must add to 1.0!')
 
-    # TODO: get data statistics
-    print(names)
+    categories = dict()
+    cat_counts = list()
+
+    for image_data, name in zip(image_array, name_array):
+        category = name.split('/')[0]
+
+        if category in categories:
+            categories[category].append(image_data)
+
+            for i, cat in enumerate(cat_counts):
+                if cat[0] == category:
+                    cat_counts[i][1] += 1
+                    break
+        else:
+            categories[category] = [name]
+            cat_counts.append([category, 1])
+
+    cat_counts.sort(key=lambda x: x[1], reverse=True)
+
+    train = list()
+    test = list()
+    validation = list()
+
+    # grab actual data
+
 
 
 def main():
