@@ -180,28 +180,25 @@ def split_groups(image_array, name_array, percent_train=0.8, percent_test=0.1, p
     y_valid = list()
 
     # grab actual data
-    if random is True:
-        # TODO: implement random sampling
-        raise NotImplementedError('Have not implemented random sampling yet')
-    else:
-        for i, data_array in enumerate(categories):
-            num_train = int(percent_train * len(data_array))
-            num_test = int(percent_test * len(data_array))
-            num_valid = int(percent_valid * len(data_array))
+    for i, data_array in enumerate(categories):
+        cat_number = i + 1
+        y_labels = [cat_number] * len(data_array)
 
-            cat_number = i + 1
+        sub_X_train, sub_X_test, sub_y_train, sub_y_test = train_test_split(data_array, y_labels,
+                                                                            train_size=percent_train, random_state=seed)
 
-            train_add = data_array[:num_train]
-            x_train.extend(train_add)
-            y_train.extend([cat_number] * len(train_add))
+        sub_X_train, sub_X_val, sub_y_train, sub_y_val = train_test_split(sub_X_train, sub_y_train,
+                                                                          test_size=percent_valid,
+                                                                          random_state=seed)  # 0.25 x 0.8 = 0.2
 
-            test_add = data_array[num_train:num_train + num_test]
-            x_test.extend(test_add)
-            y_test.extend([cat_number] * len(test_add))
+        x_train.extend(sub_X_train)
+        y_train.extend(sub_y_train)
 
-            valid_add = data_array[num_train + num_test:]
-            x_valid.extend(valid_add)
-            y_valid.extend([cat_number] * len(valid_add))
+        x_test.extend(sub_X_test)
+        y_test.extend(sub_y_test)
+
+        x_valid.extend(sub_X_val)
+        y_valid.extend(sub_y_val)
 
     return x_train, y_train, x_test, y_test, x_valid, y_valid
 
