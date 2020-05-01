@@ -162,8 +162,7 @@ def train_test_split(image_array, name_array, percent_train=0.8, percent_test=0.
     categories = list()
 
     for image_data, name in zip(image_array, name_array):
-        cat_number = name.split('/')[0]
-        cat_number = int(cat_number[:3])  # first three characters are the category number
+        cat_number = int(name[:3])  # first three characters are the category number
 
         if cat_number <= len(categories):  # have we seen this category before
             categories[cat_number - 1].append(image_data)
