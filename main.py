@@ -2,6 +2,7 @@ from PIL import Image, ImageDraw
 from warnings import warn
 import argparse
 import numpy as np
+from sklearn.model_selection import train_test_split
 
 
 # NOTE: All of the ids are 1 indexed in the 'images.txt' file, keep this in mind
@@ -154,10 +155,10 @@ def load_images(args):
     return image_data, names_array
 
 
-def train_test_split(image_array, name_array, percent_train=0.8, percent_test=0.1, percent_valid=0.1, random=True):
+def split_groups(image_array, name_array, percent_train=0.8, percent_test=0.1, percent_valid=0.1, seed=None):
     # check desired percentages add to 1.0
     if percent_test + percent_train + percent_valid != 1.0:
-        raise RuntimeError('Percentages passed to train_test_split must add to 1.0!')
+        raise RuntimeError('Percentages passed to split_groups must add to 1.0!')
 
     categories = list()
 
@@ -210,8 +211,9 @@ def main():
 
     (image_array, name_array) = load_images(args)
 
-    train_test_split(image_array, name_array)
-    x_train, y_train, x_test, y_test, x_valid, y_valid = train_test_split(image_array, name_array, random=False)
+    split_groups(image_array, name_array)
+    x_train, y_train, x_test, y_test, x_valid, y_valid = split_groups(image_array, name_array, seed=12345)
+
 
 
 if __name__ == '__main__':
