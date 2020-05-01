@@ -211,6 +211,7 @@ def main():
     (image_array, name_array) = load_images(args)
 
     train_test_split(image_array, name_array)
+    x_train, y_train, x_test, y_test, x_valid, y_valid = train_test_split(image_array, name_array, random=False)
 
 
 if __name__ == '__main__':
