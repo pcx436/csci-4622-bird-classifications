@@ -211,6 +211,9 @@ def main():
     split_groups(image_array, name_array)
     x_train, y_train, x_test, y_test, x_valid, y_valid = split_groups(image_array, name_array, seed=12345)
 
+    print(.8 * len(image_array), len(x_train), len(y_train))
+    print(.1 * len(image_array), len(x_test), len(y_test))
+    print(.1 * len(image_array), len(x_valid), len(y_valid))
 
 
 if __name__ == '__main__':
