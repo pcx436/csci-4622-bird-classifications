@@ -114,6 +114,8 @@ def load_images(args):
     names_array = list()
 
     if args.output_file:  # haven't processed images once
+        image_objects = list()
+
         images_directory = args.images_directory
         if images_directory[-1] != '/':
             images_directory += '/'
@@ -139,7 +141,7 @@ def load_images(args):
                         min_width = cropped_image.width
 
                     # save array data for each image
-                    image_data.append(cropped_image)
+                    image_objects.append(cropped_image)
 
                     # save the name of each bird
                     names_array.append(bird_id)
@@ -148,9 +150,9 @@ def load_images(args):
                     warn('Bounding box of bird {} could not be resized!'.format(i + 1))
 
         # resize all images to be the dimensions of the smallest image, translate to array data
-        for i, image_obj in enumerate(image_data):
+        for image_obj in image_objects:
             image_obj.thumbnail((min_width, min_width))
-            image_data[i] = np.asarray(image_obj)
+            image_data.append(np.asarray(image_obj))
 
         print('Number of valid images: {}'.format(len(image_data)))
         print('Could not resize {} images ({:.2f}%).'.format(num_cant_resize,
