@@ -60,7 +60,7 @@ def resize_bounding(image_dimensions, current_box):
     free_space = image_dimensions[dimension] - current_box[dimension + 2]
 
     if difference <= free_space:  # needed box growth can fit in image
-        growth_needed = difference / 2
+        growth_needed = np.ceil(difference / 2)
 
         # calculate the amount of px needed to grow in either direction
         negative_growth = current_box[dimension] - growth_needed
