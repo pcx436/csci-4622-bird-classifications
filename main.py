@@ -41,13 +41,6 @@ def convert_cartesian(current_box):
     return left, upper, right, lower
 
 
-def draw_bounding(image, box, color='white'):
-    draw = ImageDraw.Draw(image)
-    draw.rectangle(convert_cartesian(box), outline=color)
-
-    return image
-
-
 # crop an image to its bounding box
 def crop_by_box(image, current_box):
     crop_box = convert_cartesian(current_box)
@@ -98,6 +91,7 @@ def resize_bounding(image_dimensions, current_box):
 
 
 def parse_command_line_args():
+    # TODO: update help parameters to do
     parser = argparse.ArgumentParser(description='Preprocess bird images to square uniform dimensions.')
     parser.add_argument('-d', '--images-directory',
                         help='Path to root images directory. Not used when -o is provided.')
@@ -112,16 +106,18 @@ def parse_command_line_args():
     return parser.parse_args()
 
 
-def main():
-    args = parse_command_line_args()
+def load_images(args):
     id_list = build_id_list(args.image_list)
+
+    image_data = list()
+    names_array = list()
 
     if args.output_file:  # haven't processed images once
         images_directory = args.images_directory
-        boxes = read_bounding_boxes(args.bounding_box_file)
+        if images_directory[-1] != '/':
+            images_directory += '/'
 
-        image_array_output = list()
-        image_name_output = list()
+        boxes = read_bounding_boxes(args.bounding_box_file)
 
         num_cant_resize = 0
         for i in range(len(id_list)):
@@ -136,26 +132,86 @@ def main():
                     cropped_image = crop_by_box(current_image, resized_box)
 
                     # save array data for each image
-                    image_array_output.append(np.asarray(cropped_image))
+                    image_data.append(np.asarray(cropped_image))
 
                     # save the name of each bird
-                    image_name_output.append(bird_id)
+                    names_array.append(bird_id)
                 else:
                     num_cant_resize += 1
                     warn('Bounding box of bird {} could not be resized!'.format(i + 1))
 
-        print('Number of valid images: {}'.format(len(image_array_output)))
+        print('Number of valid images: {}'.format(len(image_data)))
         print('Could not resize {} images ({:.2f}%).'.format(num_cant_resize,
                                                              (num_cant_resize / len(id_list)) * 100))
         print('Saving image data to {}...'.format(args.output_file))
-        np.savez_compressed(args.output_file, image_data=image_array_output, image_names=image_name_output)
+        np.savez_compressed(args.output_file, image_data=image_data, image_names=names_array)
     else:  # images have been processed already
         loaded_arrays = np.load(args.input_file, allow_pickle=True)
         names_array = loaded_arrays['image_names']  # names will always be last array
 
         image_data = loaded_arrays['image_data']
 
-        Image.fromarray(image_data[0]).show()
+    return image_data, names_array
+
+
+def train_test_split(image_array, name_array, percent_train=0.8, percent_test=0.1, percent_valid=0.1, random=True):
+    # check desired percentages add to 1.0
+    if percent_test + percent_train + percent_valid != 1.0:
+        raise RuntimeError('Percentages passed to train_test_split must add to 1.0!')
+
+    categories = list()
+
+    for image_data, name in zip(image_array, name_array):
+        cat_number = int(name[:3])  # first three characters are the category number
+
+        if cat_number <= len(categories):  # have we seen this category before
+            categories[cat_number - 1].append(image_data)
+        else:
+            categories.append([image_data])
+
+    x_train = list()
+    y_train = list()
+
+    x_test = list()
+    y_test = list()
+
+    x_valid = list()
+    y_valid = list()
+
+    # grab actual data
+    if random is True:
+        # TODO: implement random sampling
+        raise NotImplementedError('Have not implemented random sampling yet')
+    else:
+        for i, data_array in enumerate(categories):
+            num_train = int(percent_train * len(data_array))
+            num_test = int(percent_test * len(data_array))
+            num_valid = int(percent_valid * len(data_array))
+
+            cat_number = i + 1
+
+            train_add = data_array[:num_train]
+            x_train.extend(train_add)
+            y_train.extend([cat_number] * len(train_add))
+
+            test_add = data_array[num_train:num_train + num_test]
+            x_test.extend(test_add)
+            y_test.extend([cat_number] * len(test_add))
+
+            valid_add = data_array[num_train + num_test:]
+            x_valid.extend(valid_add)
+            y_valid.extend([cat_number] * len(valid_add))
+
+    return x_train, y_train, x_test, y_test, x_valid, y_valid
+
+
+def main():
+    args = parse_command_line_args()
+
+    (image_array, name_array) = load_images(args)
+
+    train_test_split(image_array, name_array)
+    x_train, y_train, x_test, y_test, x_valid, y_valid = train_test_split(image_array, name_array, random=False)
 
 
 if __name__ == '__main__':
