@@ -121,6 +121,9 @@ def load_images(args):
 
     if args.output_file:  # haven't processed images once
         images_directory = args.images_directory
+        if images_directory[-1] != '/':
+            images_directory += '/'
+
         boxes = read_bounding_boxes(args.bounding_box_file)
 
         num_cant_resize = 0
