@@ -121,6 +121,8 @@ def load_images(args):
         boxes = read_bounding_boxes(args.bounding_box_file)
 
         num_cant_resize = 0
+        min_width = -1
+
         for i in range(len(id_list)):
             bird_id = id_list[i]
             current_box = boxes[i]
@@ -132,6 +134,10 @@ def load_images(args):
                     boxes[i] = resized_box
                     cropped_image = crop_by_box(current_image, resized_box)
 
+                    # record minimum width for resizing
+                    if cropped_image.width < min_width or min_width == -1:
+                        min_width = cropped_image.width
+
                     # save array data for each image
                     image_data.append(np.asarray(cropped_image))
 
@@ -140,6 +146,9 @@ def load_images(args):
                 else:
                     num_cant_resize += 1
                     warn('Bounding box of bird {} could not be resized!'.format(i + 1))
+
+        # resize all images to be the dimensions of the smallest image
+        
 
         print('Number of valid images: {}'.format(len(image_data)))
         print('Could not resize {} images ({:.2f}%).'.format(num_cant_resize,
