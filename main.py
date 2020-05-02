@@ -227,18 +227,21 @@ def split_groups(image_array, name_array, percent_train=0.8, percent_test=0.1, s
            np.array(y_test), np.array(x_valid), np.array(y_valid)
 
 
-def main():
+def preprocess(percent_train=0.8, percent_test=0.1, seed=None):
     args = parse_command_line_args()
 
     (image_array, name_array) = load_images(args)
 
-    split_groups(image_array, name_array)
-    x_train, y_train, x_test, y_test, x_valid, y_valid = split_groups(image_array, name_array, seed=12345)
+    return split_groups(image_array, name_array, percent_train, percent_test, seed)
 
+
+def main():
+    x_train, y_train, x_test, y_test, x_valid, y_valid = preprocess(seed=12345)
+    total = len(x_train) + len(y_train) + len(x_test) + len(y_test) + len(x_valid) + len(y_valid)
     print('Type', 'Target #', 'Actual #', 'Actual %', sep='\t')
-    print('train', .8 * len(image_array), len(x_train), np.round(len(x_train) / len(image_array), 4), sep='\t')
-    print('test', .1 * len(image_array), len(x_test), np.round(len(x_test) / len(image_array), 4), sep='\t')
-    print('valid', .1 * len(image_array), len(x_valid), np.round(len(x_valid) / len(image_array), 4), sep='\t')
+    print('train', .8 * total, len(x_train), np.round(len(x_train) / total, 4), sep='\t')
+    print('test', .1 * total, len(x_test), np.round(len(x_test) / total, 4), sep='\t')
+    print('valid', .1 * total, len(x_valid), np.round(len(x_valid) / total, 4), sep='\t')
 
 
 if __name__ == '__main__':
