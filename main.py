@@ -157,8 +157,6 @@ def load_images(args):
         # resize all images to be the dimensions of the smallest image, translate to array data
         for image_obj in image_objects:
             image_obj.thumbnail((min_width, min_width))
-            assert image_obj.size == (min_width, min_width), "GOD FUCKIN DAMN IT! Found {}, want {}".format(image_obj.size,
-                                                                                                             (min_width, min_width))
             image_data.append(np.asarray(image_obj))
 
         print('Number of valid images: {}'.format(len(image_data)))
