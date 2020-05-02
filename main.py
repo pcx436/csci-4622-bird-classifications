@@ -173,10 +173,12 @@ def load_images(args):
     return image_data, names_array
 
 
-def split_groups(image_array, name_array, percent_train=0.8, percent_test=0.1, percent_valid=0.1, seed=None):
+def split_groups(image_array, name_array, percent_train=0.8, percent_test=0.1, seed=None):
     # check desired percentages add to 1.0
-    if percent_test + percent_train + percent_valid != 1.0:
-        raise RuntimeError('Percentages passed to split_groups must add to 1.0!')
+    if percent_train < 0 or percent_test < 0:
+        raise RuntimeError('Percentage parameters passed to split_groups must be > 0')
+    elif percent_test + percent_train > 1.0:
+        raise RuntimeError('Percentages passed to split_groups must add to less than 1.0!')
 
     categories = list()
 
@@ -205,9 +207,9 @@ def split_groups(image_array, name_array, percent_train=0.8, percent_test=0.1, p
         sub_X_train, sub_X_test, sub_y_train, sub_y_test = train_test_split(data_array, y_labels,
                                                                             train_size=percent_train, random_state=seed)
 
-        sub_X_train, sub_X_val, sub_y_train, sub_y_val = train_test_split(sub_X_train, sub_y_train,
-                                                                          test_size=percent_valid,
-                                                                          random_state=seed)  # 0.25 x 0.8 = 0.2
+        sub_X_test, sub_X_val, sub_y_test, sub_y_val = train_test_split(sub_X_test, sub_y_test,
+                                                                        train_size=percent_test,
+                                                                        random_state=seed)  # 0.25 x 0.8 = 0.2
 
         x_train.extend(sub_X_train)
         y_train.extend(sub_y_train)
