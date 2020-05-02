@@ -13,7 +13,7 @@ def build_id_list(filename):
         for line in library_file:
             line_split = line.strip().split(' ')
             # add the name of the file to the list
-            id_list.append(line_split[1])  
+            id_list.append(line_split[1])
 
     return id_list
 
@@ -24,9 +24,9 @@ def read_bounding_boxes(filename):
     with open(filename, 'r') as boxes_file:
         for line in boxes_file:
             # remove the index at the beginning of the line
-            line_split = line.strip().split(' ')[1:]  
+            line_split = line.strip().split(' ')[1:]
             # convert coords to float, place in list
-            converted_tuple = [float(param) for param in line_split]  
+            converted_tuple = [float(param) for param in line_split]
             boxes.append(converted_tuple)
 
     return boxes
@@ -87,7 +87,7 @@ def resize_bounding(image_dimensions, current_box):
     else:
         ret_list = [-1, -1, -1, -1]
         # store amount more pixels required
-        ret_list[dimension] = image_dimensions[dimension] - current_box[dimension]  
+        ret_list[dimension] = image_dimensions[dimension] - current_box[dimension]
         return ret_list
 
 
@@ -223,7 +223,8 @@ def split_groups(image_array, name_array, percent_train=0.8, percent_test=0.1, s
         x_valid.extend(sub_X_val)
         y_valid.extend(sub_y_val)
 
-    return x_train, y_train, x_test, y_test, x_valid, y_valid
+    return np.array(x_train), np.array(y_train), np.array(x_test), \
+           np.array(y_test), np.array(x_valid), np.array(y_valid)
 
 
 def main():
@@ -234,10 +235,17 @@ def main():
     split_groups(image_array, name_array)
     x_train, y_train, x_test, y_test, x_valid, y_valid = split_groups(image_array, name_array, seed=12345)
 
+    print(type(x_train))
+    print(type(x_test))
+    print(type(x_valid))
+    print(type(y_train))
+    print(type(y_test))
+    print(type(y_valid))
+
     print('Type', 'Target #', 'Actual #', 'Actual %', sep='\t')
-    print('train', .8 * len(image_array), len(x_train), np.round(len(x_train)/len(image_array), 3), sep='\t')
-    print('test', .1 * len(image_array), len(x_test), np.round(len(x_test)/len(image_array), 3), sep='\t')
-    print('valid', .1 * len(image_array), len(x_valid), np.round(len(x_valid)/len(image_array), 3), sep='\t')
+    print('train', .8 * len(image_array), len(x_train), np.round(len(x_train) / len(image_array), 4), sep='\t')
+    print('test', .1 * len(image_array), len(x_test), np.round(len(x_test) / len(image_array), 4), sep='\t')
+    print('valid', .1 * len(image_array), len(x_valid), np.round(len(x_valid) / len(image_array), 4), sep='\t')
 
 
 if __name__ == '__main__':
