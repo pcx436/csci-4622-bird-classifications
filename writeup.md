@@ -8,6 +8,12 @@ University of Colorado Boulder
 - Does it state the motivation or the goal (or why it’s important, what goal the team wants to achieve, or want to learn) clearly?
 - (Extra credit) Is the project topic creative? Requires collecting data (e.g. scraping)?
 
+The goal of this project is to classify images of birds using a convolutional neural network (CNN). Image classification and recognition, a subset of deep and supervised learning, is becoming more and more important in modern technology. Examples include self-driving cars, medical imagery and diagnoses, and e-commerce. Understanding how CNNs effectively classify large volumes of image data yields endless possibilities.  
+
+Our team found a comprehensive data set of bird images and realized that while classifying images of birds may seem pointless to some individuals, bird watchers and wildlife enthusiasts would find great value in such a classifier. If a mobile application were built around our model many people would derive great value from it. As a team we also wanted to learn more about CNNs and get more experience working with them. 
+
+In this project we try several different CNN architectures to see which one performs best on the bird images. By experimenting with different architectures we hope to gain some insight as to why one works better than others.
+
 ## Data
 - Is data source properly quoted and described? (including links, brief explanations)
 - Do they explain the data description properly? The data description can include the data size
