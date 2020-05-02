@@ -130,6 +130,11 @@ def load_images(args):
             current_box = boxes[i]
 
             with Image.open(images_directory + bird_id) as current_image:
+                # check for non-RGB images (e.g., grayscale, RGBA)
+                if current_image.mode != 'RGB':
+                    warn('Bird {} not RGB (mode {})'.format(i, current_image.mode))
+                    continue
+
                 resized_box = resize_bounding(current_image.size, current_box)
 
                 if -1 not in resized_box:
