@@ -212,7 +212,7 @@ def split_groups(image_array, name_array, percent_train=0.8, percent_test=0.1, s
 
         sub_X_test, sub_X_val, sub_y_test, sub_y_val = train_test_split(sub_X_test, sub_y_test,
                                                                         train_size=percent_test,
-                                                                        random_state=seed)  # 0.25 x 0.8 = 0.2
+                                                                        random_state=seed)
 
         x_train.extend(sub_X_train)
         y_train.extend(sub_y_train)
@@ -234,13 +234,6 @@ def main():
 
     split_groups(image_array, name_array)
     x_train, y_train, x_test, y_test, x_valid, y_valid = split_groups(image_array, name_array, seed=12345)
-
-    print(type(x_train))
-    print(type(x_test))
-    print(type(x_valid))
-    print(type(y_train))
-    print(type(y_test))
-    print(type(y_valid))
 
     print('Type', 'Target #', 'Actual #', 'Actual %', sep='\t')
     print('train', .8 * len(image_array), len(x_train), np.round(len(x_train) / len(image_array), 4), sep='\t')
