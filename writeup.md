@@ -10,7 +10,7 @@ University of Colorado Boulder
 
 The goal of this project is to classify images of birds using a convolutional neural network (CNN). Image classification and recognition, a subset of deep and supervised learning, is becoming more and more important in modern technology. Examples include self-driving cars, medical imagery and diagnoses, and e-commerce. Understanding how CNNs effectively classify large volumes of image data yields endless possibilities.  
 
-Our team found a comprehensive data set of bird images and realized that while classifying images of birds may seem pointless to some individuals, bird watchers and wildlife enthusiasts would find great value in such a classifier. If a mobile application were built around our model many people would derive great value from it. As a team we also wanted to learn more about CNNs and get more experience working with them. 
+Our team found a comprehensive dataset of bird images and realized that while classifying images of birds may seem pointless to some individuals, bird watchers and wildlife enthusiasts would find great value in such a classifier. If a mobile application were built around our model many people would derive great value from it. As a team we also wanted to learn more about CNNs and get more experience working with them. 
 
 In this project we try several different CNN architectures to see which one performs best on the bird images. By experimenting with different architectures we hope to gain some insight as to why one works better than others.
 
@@ -21,10 +21,14 @@ In this project we try several different CNN architectures to see which one perf
     - e.g. for images: you can include how many samples, number of channels (color or gray or more?) or modalities, image file format, whether images have the same dimension or not etc.
     - e.g. sequential data: texts, sound file; please describe appropriate properties such as how many documents or words, how many sound files with typical length (are they the same or variable), etc.
 
-Our data set is sourced from a 2011 Caltech and UCSB collaboration. 
+The dataset we use in this project is sourced from a 2011 Caltech and UCSB collaboration. 
 The dataset can be downloaded [here](http://www.vision.caltech.edu/visipedia/CUB-200-2011.html). 
 
-There are 200 species of birds in this dataset and 11,788 images. 
+This dataset was assembled by researchers for the purpose of benefitting image classification research. There are 200 species of birds and 11,788 total images which gives an average of 59 images for each species. The images are in JPEG format with three channels (RGB). Image dimensions vary greatly from about 100 pixels to about 600 pixels. Some of the images are portrait and some are landscape.  
+
+Some of the images are more zoomed in on the bird and some have more foreground and/or background information. The dataset has bounding box data which indicates where to crop the image such that the bird fills the entire frame. 
+
+The dataset also has part location (specific pixel locations) data for beaks, wings, feet, et cetera as well as attribute data which includes colors and shapes of various parts of the bird. Unfortunately we did not have time to incorporate this data into our project.
 
 #### Data Source Citation
 Wah C., Branson S., Welinder P., Perona P., Belongie S. “The Caltech-UCSD Birds-200-2011 Dataset.” Computation & Neural Systems Technical Report, CNS-TR-2011-001.
