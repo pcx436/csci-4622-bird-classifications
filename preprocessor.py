@@ -92,13 +92,13 @@ def resize_bounding(image_dimensions, current_box):
 
 
 def parse_command_line_args():
-    # TODO: update help parameters to do
     parser = argparse.ArgumentParser(description='Preprocess bird images to square uniform dimensions.')
     parser.add_argument('-d', '--images-directory',
-                        help='Path to root images directory. Not used when -o is provided.')
-    parser.add_argument('-l', '--image-list', required=True, help='Path to file with image id and name.')
+                        help='Directory containing the required images. Not used when -o is provided.')
+    parser.add_argument('-l', '--image-list', help='Path to file with image id and name (images.txt).')
     parser.add_argument('-b', '--bounding-box-file',
-                        help='Path to file with image id and bounding box info. Not used when -o is provided.')
+                        help='Path to file containing bounding box information (bounding_boxes.txt).\
+                        Not used when -o is provided.')
 
     in_or_out = parser.add_mutually_exclusive_group(required=True)
     in_or_out.add_argument('-o', '--output-file',
@@ -108,12 +108,11 @@ def parse_command_line_args():
 
 
 def load_images(args):
-    id_list = build_id_list(args.image_list)
-
     image_data = list()
     names_array = list()
 
     if args.output_file:  # haven't processed images once
+        id_list = build_id_list(args.image_list)
         image_objects = list()
 
         images_directory = args.images_directory
@@ -212,7 +211,7 @@ def split_groups(image_array, name_array, percent_train=0.8, percent_test=0.1, s
 
         sub_X_test, sub_X_val, sub_y_test, sub_y_val = train_test_split(sub_X_test, sub_y_test,
                                                                         train_size=percent_test,
-                                                                        random_state=seed)  # 0.25 x 0.8 = 0.2
+                                                                        random_state=seed)
 
         x_train.extend(sub_X_train)
         y_train.extend(sub_y_train)
@@ -227,25 +226,21 @@ def split_groups(image_array, name_array, percent_train=0.8, percent_test=0.1, s
            np.array(y_test), np.array(x_valid), np.array(y_valid)
 
 
-def main():
+def preprocess(percent_train=0.8, percent_test=0.1, seed=None):
     args = parse_command_line_args()
 
     (image_array, name_array) = load_images(args)
 
-    split_groups(image_array, name_array)
-    x_train, y_train, x_test, y_test, x_valid, y_valid = split_groups(image_array, name_array, seed=12345)
+    return split_groups(image_array, name_array, percent_train, percent_test, seed)
 
-    print(type(x_train))
-    print(type(x_test))
-    print(type(x_valid))
-    print(type(y_train))
-    print(type(y_test))
-    print(type(y_valid))
 
+def main():
+    x_train, y_train, x_test, y_test, x_valid, y_valid = preprocess(seed=12345)
+    total = len(x_train) + len(y_train) + len(x_test) + len(y_test) + len(x_valid) + len(y_valid)
     print('Type', 'Target #', 'Actual #', 'Actual %', sep='\t')
-    print('train', .8 * len(image_array), len(x_train), np.round(len(x_train) / len(image_array), 4), sep='\t')
-    print('test', .1 * len(image_array), len(x_test), np.round(len(x_test) / len(image_array), 4), sep='\t')
-    print('valid', .1 * len(image_array), len(x_valid), np.round(len(x_valid) / len(image_array), 4), sep='\t')
+    print('train', .8 * total, len(x_train), np.round(len(x_train) / total, 4), sep='\t')
+    print('test', .1 * total, len(x_test), np.round(len(x_test) / total, 4), sep='\t')
+    print('valid', .1 * total, len(x_valid), np.round(len(x_valid) / total, 4), sep='\t')
 
 
 if __name__ == '__main__':
