@@ -1,7 +1,8 @@
-from PIL import Image, ImageDraw
+from PIL import Image
 from warnings import warn
 import argparse
 import numpy as np
+from sklearn.model_selection import train_test_split
 
 
 # NOTE: All of the ids are 1 indexed in the 'images.txt' file, keep this in mind
@@ -12,7 +13,7 @@ def build_id_list(filename):
         for line in library_file:
             line_split = line.strip().split(' ')
             # add the name of the file to the list
-            id_list.append(line_split[1])  
+            id_list.append(line_split[1])
 
     return id_list
 
@@ -23,9 +24,9 @@ def read_bounding_boxes(filename):
     with open(filename, 'r') as boxes_file:
         for line in boxes_file:
             # remove the index at the beginning of the line
-            line_split = line.strip().split(' ')[1:]  
+            line_split = line.strip().split(' ')[1:]
             # convert coords to float, place in list
-            converted_tuple = [float(param) for param in line_split]  
+            converted_tuple = [float(param) for param in line_split]
             boxes.append(converted_tuple)
 
     return boxes
@@ -59,7 +60,7 @@ def resize_bounding(image_dimensions, current_box):
     free_space = image_dimensions[dimension] - current_box[dimension + 2]
 
     if difference <= free_space:  # needed box growth can fit in image
-        growth_needed = difference / 2
+        growth_needed = np.ceil(difference / 2)
 
         # calculate the amount of px needed to grow in either direction
         negative_growth = current_box[dimension] - growth_needed
@@ -71,12 +72,12 @@ def resize_bounding(image_dimensions, current_box):
 
         if negative_growth_debt == 0 and positive_growth_debt == 0:  # no debt, can grow freely
             current_box[dimension] -= growth_needed
-            current_box[dimension + 2] += difference
+            current_box[dimension + 2] = current_box[3 - dimension]
 
         elif negative_growth_debt != 0:  # negative debt, grow positive as needed
             current_box[dimension] = 0
             # get the number for the opposite dimension
-            current_box[dimension + 2] = current_box[3 - dimension]  
+            current_box[dimension + 2] = current_box[3 - dimension]
 
         else:  # positive debt, grow negative as needed
             current_box[dimension] -= growth_needed + positive_growth_debt
@@ -86,7 +87,7 @@ def resize_bounding(image_dimensions, current_box):
     else:
         ret_list = [-1, -1, -1, -1]
         # store amount more pixels required
-        ret_list[dimension] = image_dimensions[dimension] - current_box[dimension]  
+        ret_list[dimension] = image_dimensions[dimension] - current_box[dimension]
         return ret_list
 
 
@@ -113,6 +114,8 @@ def load_images(args):
     names_array = list()
 
     if args.output_file:  # haven't processed images once
+        image_objects = list()
+
         images_directory = args.images_directory
         if images_directory[-1] != '/':
             images_directory += '/'
@@ -120,25 +123,41 @@ def load_images(args):
         boxes = read_bounding_boxes(args.bounding_box_file)
 
         num_cant_resize = 0
+        min_width = -1
+
         for i in range(len(id_list)):
             bird_id = id_list[i]
             current_box = boxes[i]
 
             with Image.open(images_directory + bird_id) as current_image:
+                # check for non-RGB images (e.g., grayscale, RGBA)
+                if current_image.mode != 'RGB':
+                    warn('Bird {} not RGB (mode {})'.format(i, current_image.mode))
+                    continue
+
                 resized_box = resize_bounding(current_image.size, current_box)
 
                 if -1 not in resized_box:
                     boxes[i] = resized_box
                     cropped_image = crop_by_box(current_image, resized_box)
 
+                    # record minimum width for resizing
+                    if cropped_image.width < min_width or min_width == -1:
+                        min_width = cropped_image.width
+
                     # save array data for each image
-                    image_data.append(np.asarray(cropped_image))
+                    image_objects.append(cropped_image)
 
                     # save the name of each bird
                     names_array.append(bird_id)
                 else:
                     num_cant_resize += 1
                     warn('Bounding box of bird {} could not be resized!'.format(i + 1))
+
+        # resize all images to be the dimensions of the smallest image, translate to array data
+        for image_obj in image_objects:
+            image_obj.thumbnail((min_width, min_width))
+            image_data.append(np.asarray(image_obj))
 
         print('Number of valid images: {}'.format(len(image_data)))
         print('Could not resize {} images ({:.2f}%).'.format(num_cant_resize,
@@ -154,10 +173,12 @@ def load_images(args):
     return image_data, names_array
 
 
-def train_test_split(image_array, name_array, percent_train=0.8, percent_test=0.1, percent_valid=0.1, random=True):
+def split_groups(image_array, name_array, percent_train=0.8, percent_test=0.1, seed=None):
     # check desired percentages add to 1.0
-    if percent_test + percent_train + percent_valid != 1.0:
-        raise RuntimeError('Percentages passed to train_test_split must add to 1.0!')
+    if percent_train < 0 or percent_test < 0:
+        raise RuntimeError('Percentage parameters passed to split_groups must be > 0')
+    elif percent_test + percent_train > 1.0:
+        raise RuntimeError('Percentages passed to split_groups must add to less than 1.0!')
 
     categories = list()
 
@@ -178,31 +199,32 @@ def train_test_split(image_array, name_array, percent_train=0.8, percent_test=0.
     x_valid = list()
     y_valid = list()
 
+    # resizing test percentage
+    percent_test /= 1.0 - percent_train  # assuming that percent train is larger
+
     # grab actual data
-    if random is True:
-        # TODO: implement random sampling
-        raise NotImplementedError('Have not implemented random sampling yet')
-    else:
-        for i, data_array in enumerate(categories):
-            num_train = int(percent_train * len(data_array))
-            num_test = int(percent_test * len(data_array))
-            num_valid = int(percent_valid * len(data_array))
+    for i, data_array in enumerate(categories):
+        cat_number = i + 1
+        y_labels = [cat_number] * len(data_array)
 
-            cat_number = i + 1
+        sub_X_train, sub_X_test, sub_y_train, sub_y_test = train_test_split(data_array, y_labels,
+                                                                            train_size=percent_train, random_state=seed)
 
-            train_add = data_array[:num_train]
-            x_train.extend(train_add)
-            y_train.extend([cat_number] * len(train_add))
+        sub_X_test, sub_X_val, sub_y_test, sub_y_val = train_test_split(sub_X_test, sub_y_test,
+                                                                        train_size=percent_test,
+                                                                        random_state=seed)  # 0.25 x 0.8 = 0.2
 
-            test_add = data_array[num_train:num_train + num_test]
-            x_test.extend(test_add)
-            y_test.extend([cat_number] * len(test_add))
+        x_train.extend(sub_X_train)
+        y_train.extend(sub_y_train)
 
-            valid_add = data_array[num_train + num_test:]
-            x_valid.extend(valid_add)
-            y_valid.extend([cat_number] * len(valid_add))
+        x_test.extend(sub_X_test)
+        y_test.extend(sub_y_test)
 
-    return x_train, y_train, x_test, y_test, x_valid, y_valid
+        x_valid.extend(sub_X_val)
+        y_valid.extend(sub_y_val)
+
+    return np.array(x_train), np.array(y_train), np.array(x_test), \
+           np.array(y_test), np.array(x_valid), np.array(y_valid)
 
 
 def main():
@@ -210,8 +232,20 @@ def main():
 
     (image_array, name_array) = load_images(args)
 
-    train_test_split(image_array, name_array)
-    x_train, y_train, x_test, y_test, x_valid, y_valid = train_test_split(image_array, name_array, random=False)
+    split_groups(image_array, name_array)
+    x_train, y_train, x_test, y_test, x_valid, y_valid = split_groups(image_array, name_array, seed=12345)
+
+    print(type(x_train))
+    print(type(x_test))
+    print(type(x_valid))
+    print(type(y_train))
+    print(type(y_test))
+    print(type(y_valid))
+
+    print('Type', 'Target #', 'Actual #', 'Actual %', sep='\t')
+    print('train', .8 * len(image_array), len(x_train), np.round(len(x_train) / len(image_array), 4), sep='\t')
+    print('test', .1 * len(image_array), len(x_test), np.round(len(x_test) / len(image_array), 4), sep='\t')
+    print('valid', .1 * len(image_array), len(x_valid), np.round(len(x_valid) / len(image_array), 4), sep='\t')
 
 
 if __name__ == '__main__':
