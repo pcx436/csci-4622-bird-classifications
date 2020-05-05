@@ -237,7 +237,7 @@ def preprocess(args=None, percent_train=0.8, percent_test=0.1, seed=None):
 
 def main():
     x_train, y_train, x_test, y_test, x_valid, y_valid = preprocess(seed=12345)
-    total = len(x_train) + len(y_train) + len(x_test) + len(y_test) + len(x_valid) + len(y_valid)
+    total = len(x_train) + len(x_test) + len(x_valid)
     print('Type', 'Target #', 'Actual #', 'Actual %', sep='\t')
     print('train', .8 * total, len(x_train), np.round(len(x_train) / total, 4), sep='\t')
     print('test', .1 * total, len(x_test), np.round(len(x_test) / total, 4), sep='\t')
