@@ -91,7 +91,7 @@ def resize_bounding(image_dimensions, current_box):
         return ret_list
 
 
-def parse_command_line_args():
+def parse_command_line_args(args=None):
     parser = argparse.ArgumentParser(description='Preprocess bird images to square uniform dimensions.')
     parser.add_argument('-d', '--images-directory',
                         help='Directory containing the required images. Not used when -o is provided.')
@@ -104,7 +104,8 @@ def parse_command_line_args():
     in_or_out.add_argument('-o', '--output-file',
                            help='Path to file where you want resulting image information stored (npz format).')
     in_or_out.add_argument('-i', '--input-file', help='Path to .npz file containing image data.')
-    return parser.parse_args()
+    
+    return parser.parse_args() if args is None else parser.parse_args(args)
 
 
 def load_images(args):
@@ -226,8 +227,8 @@ def split_groups(image_array, name_array, percent_train=0.8, percent_test=0.1, s
            np.array(y_test), np.array(x_valid), np.array(y_valid)
 
 
-def preprocess(percent_train=0.8, percent_test=0.1, seed=None):
-    args = parse_command_line_args()
+def preprocess(args=None, percent_train=0.8, percent_test=0.1, seed=None):
+    args = parse_command_line_args(args)
 
     (image_array, name_array) = load_images(args)
 
@@ -236,7 +237,7 @@ def preprocess(percent_train=0.8, percent_test=0.1, seed=None):
 
 def main():
     x_train, y_train, x_test, y_test, x_valid, y_valid = preprocess(seed=12345)
-    total = len(x_train) + len(y_train) + len(x_test) + len(y_test) + len(x_valid) + len(y_valid)
+    total = len(x_train) + len(x_test) + len(x_valid)
     print('Type', 'Target #', 'Actual #', 'Actual %', sep='\t')
     print('train', .8 * total, len(x_train), np.round(len(x_train) / total, 4), sep='\t')
     print('test', .1 * total, len(x_test), np.round(len(x_test) / total, 4), sep='\t')
