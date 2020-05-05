@@ -21,13 +21,16 @@ def build_id_list(filename):
 # reads in the bounding boxes
 def read_bounding_boxes(filename):
     boxes = list()
+
     with open(filename, 'r') as boxes_file:
         for line in boxes_file:
             # remove the index at the beginning of the line
             line_split = line.strip().split(' ')[1:]
+
             # convert coords to float, place in list
-            converted_tuple = [float(param) for param in line_split]
-            boxes.append(converted_tuple)
+            converted_list = [float(param) for param in line_split]
+
+            boxes.append(converted_list)
 
     return boxes
 
