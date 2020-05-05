@@ -32,7 +32,7 @@ def read_bounding_boxes(filename):
     return boxes
 
 
-# convert bounding box system to cartesian coordinate system
+# convert bounding box system to cartesian coordinate system, required by some Pillow functions
 def convert_cartesian(current_box):
     left = current_box[0]
     upper = current_box[1]
@@ -42,7 +42,7 @@ def convert_cartesian(current_box):
     return left, upper, right, lower
 
 
-# crop an image to its bounding box
+# crop an image to its bounding box. Used to simply convert by cartesian coordinates
 def crop_by_box(image, current_box):
     crop_box = convert_cartesian(current_box)
     cropped_image = image.crop(crop_box)
@@ -64,28 +64,31 @@ def resize_bounding(image_dimensions, current_box):
 
         # calculate the amount of px needed to grow in either direction
         negative_growth = current_box[dimension] - growth_needed
+
+        # 0 if wont grow beyond image bounds
         negative_growth_debt = abs(negative_growth) if negative_growth < 0 else 0
 
-        current_positive = current_box[dimension] + current_box[dimension + 2]
+        current_positive = current_box[dimension] + current_box[dimension + 2]  # getting coordinate
         positive_growth = (current_positive + growth_needed) - image_dimensions[dimension]
+
+        # 0 if wont grow beyond image bounds
         positive_growth_debt = abs(positive_growth) if positive_growth > 0 else 0
 
         if negative_growth_debt == 0 and positive_growth_debt == 0:  # no debt, can grow freely
             current_box[dimension] -= growth_needed
-            current_box[dimension + 2] = current_box[3 - dimension]
 
         elif negative_growth_debt != 0:  # negative debt, grow positive as needed
             current_box[dimension] = 0
-            # get the number for the opposite dimension
-            current_box[dimension + 2] = current_box[3 - dimension]
 
         else:  # positive debt, grow negative as needed
             current_box[dimension] -= growth_needed + positive_growth_debt
-            current_box[dimension + 2] = current_box[3 - dimension]
+
+        current_box[dimension + 2] = current_box[3 - dimension]  # set the width/height to that of the other dimension
 
         return current_box
-    else:
+    else:  # can't resize box to square, return list with some -1's
         ret_list = [-1, -1, -1, -1]
+
         # store amount more pixels required
         ret_list[dimension] = image_dimensions[dimension] - current_box[dimension]
         return ret_list
