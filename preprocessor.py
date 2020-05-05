@@ -113,11 +113,11 @@ def load_images(args):
     names_array = list()
 
     if args.output_file:  # haven't processed images once
-        id_list = build_id_list(args.image_list)
-        image_objects = list()
+        id_list = build_id_list(args.image_list)  # read the images.txt file
+        image_objects = list()  # will contain all of the Pillow Image objects
 
         images_directory = args.images_directory
-        if images_directory[-1] != '/':
+        if images_directory[-1] != '/':  # make sure the path is specified correctly
             images_directory += '/'
 
         boxes = read_bounding_boxes(args.bounding_box_file)
@@ -130,16 +130,18 @@ def load_images(args):
             current_box = boxes[i]
 
             with Image.open(images_directory + bird_id) as current_image:
-                # check for non-RGB images (e.g., grayscale, RGBA)
+                # ignore image if non-RGB (e.g., grayscale, RGBA)
                 if current_image.mode != 'RGB':
                     warn('Bird {} not RGB (mode {})'.format(i, current_image.mode))
                     continue
 
+                # resize the bounding box of the current image to be a square
                 resized_box = resize_bounding(current_image.size, current_box)
 
+                # No error in attempt to resize
                 if -1 not in resized_box:
-                    boxes[i] = resized_box
-                    cropped_image = crop_by_box(current_image, resized_box)
+                    boxes[i] = resized_box  # update box list with resized box
+                    cropped_image = crop_by_box(current_image, resized_box)  # crop the image by its new bounding box
 
                     # record minimum width for resizing
                     if cropped_image.width < min_width or min_width == -1:
@@ -180,6 +182,7 @@ def split_groups(image_array, name_array, percent_train=0.8, percent_test=0.1, s
     elif percent_test + percent_train > 1.0:
         raise RuntimeError('Percentages passed to split_groups must add to less than 1.0!')
 
+    # list of the data for each image sorted by category
     categories = list()
 
     for image_data, name in zip(image_array, name_array):
@@ -205,8 +208,9 @@ def split_groups(image_array, name_array, percent_train=0.8, percent_test=0.1, s
     # grab actual data
     for i, data_array in enumerate(categories):
         cat_number = i + 1
-        y_labels = [cat_number] * len(data_array)
+        y_labels = [cat_number] * len(data_array)  # for y value arrays
 
+        # Use train_test_split twice to separate into train, test, and validation arrays
         sub_X_train, sub_X_test, sub_y_train, sub_y_test = train_test_split(data_array, y_labels,
                                                                             train_size=percent_train, random_state=seed)
 
@@ -214,6 +218,7 @@ def split_groups(image_array, name_array, percent_train=0.8, percent_test=0.1, s
                                                                         train_size=percent_test,
                                                                         random_state=seed)
 
+        # Add the split data into the lists that will be returned
         x_train.extend(sub_X_train)
         y_train.extend(sub_y_train)
 
@@ -223,10 +228,12 @@ def split_groups(image_array, name_array, percent_train=0.8, percent_test=0.1, s
         x_valid.extend(sub_X_val)
         y_valid.extend(sub_y_val)
 
+    # Return all of the lists as numpy arrays
     return np.array(x_train), np.array(y_train), np.array(x_test), \
            np.array(y_test), np.array(x_valid), np.array(y_valid)
 
 
+# abstracted function used for ease of loading in the model files
 def preprocess(args=None, percent_train=0.8, percent_test=0.1, seed=None):
     args = parse_command_line_args(args)
 
